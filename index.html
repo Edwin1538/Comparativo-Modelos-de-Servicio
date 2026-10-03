@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama Comparativo: Modelos de Servicio en la Nube - By Edwin Casallas</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      
+      /* Colores por Modelo */
+      --onsite: #ef4444;
+      --iaas: #f59e0b;
+      --paas: #3b82f6;
+      --saas: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.5; padding: 20px; }
+
+    header { text-align: center; max-width: 900px; margin: 0 auto 30px auto; }
+    header h1 { font-size: 2.2rem; color: #38bdf8; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1rem; }
+
+    footer { text-align: center; max-width: 900px; margin: 0 auto 30px auto; }
+    footer h1 { font-size: 1.2rem; color: #848788; margin-bottom: 10px; }
+    footer p { color: var(--text-muted); font-size: 1rem; }
+
+    /* Controles e Interacción */
+    .filter-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+    .filter-btn {
+      background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border);
+      padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.25s ease;
+    }
+    .filter-btn:hover { border-color: #38bdf8; color: #fff; }
+    .filter-btn.active { background: #38bdf8; color: #000; border-color: #38bdf8; }
+
+    /* Grid Comparativo Principal */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1300px;
+      margin: 0 auto 40px auto;
+    }
+
+    .model-card {
+      background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
+      overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .model-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
+
+    .card-header { padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
+    .card-header h2 { font-size: 1.5rem; margin-bottom: 4px; }
+    .card-header span { font-size: 0.8rem; text-transform: uppercase; tracking: 1px; font-weight: 700; opacity: 0.9; }
+
+    .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; }
+
+    /* Capas de Responsabilidad (Stack) */
+    .stack-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .stack-list { display: flex; flex-direction: column; gap: 6px; }
+    .stack-item {
+      padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .stack-item.user { background: rgba(255,255,255,0.08); border-left: 4px solid #f8fafc; color: #fff; }
+    .stack-item.vendor { background: rgba(0,0,0,0.3); border-left: 4px solid var(--border); color: var(--text-muted); }
+
+    .badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .badge.user { background: #f8fafc; color: #000; }
+    .badge.vendor { background: var(--border); color: var(--text-muted); }
+
+    /* Leyenda de Responsabilidad */
+    .legend-box {
+      background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .legend-box strong { color: var(--text-main); }
+
+    /* Tabla Resumen Sintética */
+    .table-container { max-width: 1300px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th, td { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    th { background: #0f172a; color: #38bdf8; font-size: 0.85rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.6rem; }
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Diagrama Comparativo: Modelos en la Nube</h1>
+    <p>Detalle a continuación la distribución de responsabilidades entre el usuario y el proveedor de servicios informáticos.</p>
+    <!-- <p></p> -->
+  </header>
+
+  <!-- Filtros Interactivos -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterView('all')">👁️ Comparativa General</button>
+    <button class="filter-btn" onclick="filterView('onsite')">🏠 On-Site</button>
+    <button class="filter-btn" onclick="filterView('iaas')">🏗️ IaaS</button>
+    <button class="filter-btn" onclick="filterView('paas')">⚙️ PaaS</button>
+    <button class="filter-btn" onclick="filterView('saas')">📱 SaaS</button>
+  </div>
+
+  <!-- Grid Comparativo de Tarjetas -->
+  <div class="comparison-grid" id="grid">
+    
+    <!-- ON-SITE -->
+    <div class="model-card" data-model="onsite">
+      <div class="card-header" style="background: rgba(239, 68, 68, 0.15); color: var(--onsite);">
+        <h2>On-Site</h2>
+        <span>Tradicional / Local</span>
+      </div>
+      <div class="card-body">
+        <div class="legend-box">
+          <strong>Analogía (Pizza hecha en casa):</strong>  Uno compra los ingredientes, pone el horno, organiza el comedor y sirve la bebida.
+        </div>
+        <div>
+          <div class="stack-title">Pila de Gestión (Stack)</div>
+          <div class="stack-list">
+            <div class="stack-item user"><span>Aplicaciones</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Datos</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Runtime (Ejecución)</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Middleware</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Sistema Operativo</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Virtualización</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Servidores</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Almacenamiento</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Redes Física</span> <span class="badge user">Cliente/ Usuario</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IAAS -->
+    <div class="model-card" data-model="iaas">
+      <div class="card-header" style="background: rgba(245, 158, 11, 0.15); color: var(--iaas);">
+        <h2>IaaS</h2>
+        <span>Infraestructura como Servicio</span>
+      </div>
+      <div class="card-body">
+        <div class="legend-box">
+          <strong>Analogía (Pizza congelada):</strong> Se compran la masa e ingredientes listos, pero aqui se usa el propio horno y el comedor.
+        </div>
+        <div>
+          <div class="stack-title">Pila de Gestión (Stack)</div>
+          <div class="stack-list">
+            <div class="stack-item user"><span>Aplicaciones</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Datos</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Runtime (Ejecución)</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Middleware</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Sistema Operativo</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item vendor"><span>Virtualización</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Servidores</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Almacenamiento</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Redes Física</span> <span class="badge vendor">Nube</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAAS -->
+    <div class="model-card" data-model="paas">
+      <div class="card-header" style="background: rgba(59, 130, 246, 0.15); color: var(--paas);">
+        <h2>PaaS</h2>
+        <span>Plataforma como Servicio</span>
+      </div>
+      <div class="card-body">
+        <div class="legend-box">
+          <strong>Analogía (Pizza a domicilio):</strong> Alguien trae la pizza lista a casa, uno solo pone el comedor y la bebida.
+        </div>
+        <div>
+          <div class="stack-title">Pila de Gestión (Stack)</div>
+          <div class="stack-list">
+            <div class="stack-item user"><span>Aplicaciones</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item user"><span>Datos</span> <span class="badge user">Cliente/ Usuario</span></div>
+            <div class="stack-item vendor"><span>Runtime (Ejecución)</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Middleware</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Sistema Operativo</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Virtualización</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Servidores</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Almacenamiento</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Redes Física</span> <span class="badge vendor">Nube</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAAS -->
+    <div class="model-card" data-model="saas">
+      <div class="card-header" style="background: rgba(16, 185, 129, 0.15); color: var(--saas);">
+        <h2>SaaS</h2>
+        <span>Software como Servicio</span>
+      </div>
+      <div class="card-body">
+        <div class="legend-box">
+          <strong>Analogía (Comer en restaurante):</strong> Uno va al lugar, pide, le sirven y no se preocupa por nada de la cocina.
+        </div>
+        <div>
+          <div class="stack-title">Pila de Gestión (Stack)</div>
+          <div class="stack-list">
+            <div class="stack-item vendor"><span>Aplicaciones</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Datos</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Runtime (Ejecución)</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Middleware</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Sistema Operativo</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Virtualización</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Servidores</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Almacenamiento</span> <span class="badge vendor">Nube</span></div>
+            <div class="stack-item vendor"><span>Redes Física</span> <span class="badge vendor">Nube</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tabla Resumen Sintética -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Parámetro / Modelo</th>
+          <th>On-Site</th>
+          <th>IaaS</th>
+          <th>PaaS</th>
+          <th>SaaS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Control de Infraestructura</strong></td>
+          <td>Total (100%)</td>
+          <td>Alto (Control del S.O. y red virtual)</td>
+          <td>Medio (Solo código y configuración)</td>
+          <td>Nulo (Solo configuración de usuario)</td>
+        </tr>
+        <tr>
+          <td><strong>Mantenimiento Físico</strong></td>
+          <td>100% Responsabilidad propia</td>
+          <td>Delegado al proveedor</td>
+          <td>Delegado al proveedor</td>
+          <td>Delegado al proveedor</td>
+        </tr>
+        <tr>
+          <td><strong>Usuarios Principales</strong></td>
+          <td>Administradores de TI locales</td>
+          <td>Arquitectos de red y Administradores</td>
+          <td>Desarrolladores de Software</td>
+          <td>Usuarios finales / Clientes</td>
+        </tr>
+        <tr>
+          <td><strong>Ejemplos Reales</strong></td>
+          <td>Servidores propios en data center</td>
+          <td>AWS EC2, Google Compute Engine, Azure VMs</td>
+          <td>Heroku, AWS Elastic Beanstalk, Firebase</td>
+          <td>Gmail, Microsoft 365, Google Drive, Netflix</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function filterView(model) {
+      // Actualizar botones activos
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Filtrar tarjetas
+      const cards = document.querySelectorAll('.model-card');
+      cards.forEach(card => {
+        if (model === 'all' || card.getAttribute('data-model') === model) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+<footer>
+  <h1>Diagrama Comparativo hecho por Edwin Alberto Casallas García- Curso Redes y Comunicaciones II</h1>
+</footer>
+</html>
